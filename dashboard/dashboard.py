@@ -5,8 +5,8 @@ import seaborn as sns
 from babel.numbers import format_currency
 
 # Load datasets
-hour_df = pd.read_csv('hour.csv') 
-day_df = pd.read_csv('day.csv')    
+hour_df = pd.read_csv('/dashboard/hour.csv') 
+day_df = pd.read_csv('/dashboard/day.csv')    
 # Set up Streamlit layout
 st.title("Bike Rentals Dashboard")
 st.sidebar.header("Filters")
