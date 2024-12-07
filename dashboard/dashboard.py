@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from babel.numbers import format_currency
-
+/dashboard.py/__init__.py
 # Load datasets
 hour_df = pd.read_csv('/dashboard/hour.csv') 
 day_df = pd.read_csv('/dashboard/day.csv')    
