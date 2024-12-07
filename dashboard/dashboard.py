@@ -2,10 +2,11 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from babel.numbers import format_currency
 
 # Load datasets
-hour_df = pd.read_csv('D:\Bangkit\submission\data\hour.csv') 
-day_df = pd.read_csv('D:\Bangkit\submission\data\day.csv')    
+hour_df = pd.read_csv('hour.csv') 
+day_df = pd.read_csv('day.csv')    
 # Set up Streamlit layout
 st.title("Bike Rentals Dashboard")
 st.sidebar.header("Filters")
