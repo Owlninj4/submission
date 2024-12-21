@@ -2,15 +2,15 @@
 
 ## Setup Environment - Anaconda
 ```
-conda create --name bangkit python=3.9
-conda activate bangkit
+conda create --name submission python=3.13.1
+conda activate submission
 pip install -r requirements.txt
 ```
 
 ## Setup Environment - Shell/Terminal
 ```
-mkdir proyek_analisis_data
-cd proyek_analisis_data
+mkdir submission
+cd submission
 pipenv install
 pipenv shell
 pip install -r requirements.txt
@@ -18,5 +18,6 @@ pip install -r requirements.txt
 
 ## Run steamlit app
 ```
+cd dashboard
 streamlit run dashboard.py
 ```
