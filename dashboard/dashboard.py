@@ -2,10 +2,15 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+
+# Tentukan base path
+base_path = 'dashboard' if os.path.exists('dashboard') else '.'
 
 # Load datasets
-hour_df = pd.read_csv("dashboard/hour.csv") 
-day_df = pd.read_csv("dashboard/day.csv")    
+hour_df = pd.read_csv(f'{base_path}/hour.csv')
+day_df = pd.read_csv(f'{base_path}/day.csv')
+
 # Set up Streamlit layout
 st.title("Bike Rentals Dashboard")
 st.sidebar.header("Filters")
