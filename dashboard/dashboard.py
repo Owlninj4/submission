@@ -10,104 +10,67 @@ base_path = 'dashboard' if os.path.exists('dashboard') else '.'
 # Load datasets
 hour_df = pd.read_csv(f'{base_path}/hour.csv')
 day_df = pd.read_csv(f'{base_path}/day.csv')
-
+day_df['dteday'] = pd.to_datetime(day_df['dteday'])   
 # Set up Streamlit layout
-st.title("Bike Rentals Dashboard")
-st.sidebar.header("Filters")
 
-# Sidebar for selecting dataset type (Hourly or Daily)
-dataset_type = st.sidebar.radio("Select Dataset Type", ['Hourly', 'Daily'])
+st.sidebar.header("Filter Data")
+rentang_tanggal = st.sidebar.date_input("Pilih Rentang Tanggal", [day_df['dteday'].min(), day_df['dteday'].max()])
+musim_terpilih = st.sidebar.multiselect(
+    "Pilih Musim", 
+    options=day_df['season'].unique(),
+    default=day_df['season'].unique()
+)
+cuaca_terpilih = st.sidebar.multiselect(
+    "Pilih Kondisi Cuaca", 
+    options=day_df['weathersit'].unique(),
+    default=day_df['weathersit'].unique()
+)
 
-# Filter data based on user selection
-if dataset_type == 'Hourly':
-    df = hour_df
-else:
-    df = day_df
+# Filter data
+data_terfilter = day_df[
+    (day_df['dteday'] >= pd.Timestamp(rentang_tanggal[0])) &
+    (day_df['dteday'] <= pd.Timestamp(rentang_tanggal[1])) &
+    (day_df['season'].isin(musim_terpilih)) &
+    (day_df['weathersit'].isin(cuaca_terpilih))
+]
 
-# Display basic information about the selected dataset
-st.write(f"Displaying dataset: {dataset_type} Data")
-st.write(df.describe())
+# Judul Dashboard
+st.title("Dashboard Data Penyewaan Sepeda")
+st.write("Dashboard ini memberikan wawasan tentang pola penyewaan sepeda berdasarkan data historis.")
 
-# Key Factor Visualizations
-st.header("Key Factors Influencing Bike Rentals")
+# Analisis Pertanyaan Bisnis
+st.header("1. Analisis Segmentasi Pelanggan")
+data_segmentasi = data_terfilter[['casual', 'registered']].sum()
+st.bar_chart(data_segmentasi, use_container_width=True)
+st.write("**Kesimpulan:** Pelanggan terdaftar berkontribusi lebih besar dibandingkan pelanggan kasual dalam total penyewaan sepeda.")
 
-# Plot temperature vs bike rental count
-st.subheader("Temperature vs Bike Rentals")
-fig, ax = plt.subplots()
-sns.scatterplot(data=df, x='temp', y='cnt', ax=ax)
-ax.set_title('Temperature vs Bike Rentals')
-ax.set_xlabel('Temperature')
-ax.set_ylabel('Bike Rentals')
-st.pyplot(fig)
+st.header("2. Strategi Retensi Pelanggan")
+rata_rata_penyewaan = data_terfilter.groupby(['workingday'])['cnt'].mean().reset_index()
+rata_rata_penyewaan['workingday'] = rata_rata_penyewaan['workingday'].replace({0: 'Hari Libur', 1: 'Hari Kerja'})
+rata_rata_penyewaan = rata_rata_penyewaan.rename(columns={'workingday': 'Jenis Hari', 'cnt': 'Rata-rata Penyewaan'})
+st.bar_chart(rata_rata_penyewaan.set_index('Jenis Hari'), use_container_width=True)
+st.write("**Kesimpulan:** Hari kerja menunjukkan jumlah penyewaan yang lebih tinggi, mengindikasikan penggunaan sepeda untuk keperluan komuter.")
 
-# Plot weather situation vs bike rental count
-st.subheader("Weather Situation vs Bike Rentals")
-fig, ax = plt.subplots()
-sns.boxplot(data=df, x='weathersit', y='cnt', ax=ax)
-ax.set_title('Weather Situation vs Bike Rentals')
-ax.set_xlabel('Weather Situation')
-ax.set_ylabel('Bike Rentals')
-st.pyplot(fig)
+st.header("3. Optimasi Pemasaran")
+plt.figure(figsize=(10, 5))
+sns.boxplot(x='season', y='cnt', data=data_terfilter)
+st.pyplot(plt.gcf())
+st.write("**Kesimpulan:** Kampanye pemasaran dapat difokuskan pada musim panas dan musim gugur yang memiliki tingkat penyewaan lebih tinggi.")
 
-# Plot casual vs registered rentals
-st.subheader("Casual vs Registered Bike Rentals")
-fig, ax = plt.subplots()
-sns.kdeplot(df['casual'], label='Casual Users', shade=True)
-sns.kdeplot(df['registered'], label='Registered Users', shade=True)
-ax.set_title('Casual vs Registered Bike Rentals')
-ax.set_xlabel('Number of Rentals')
-ax.set_ylabel('Density')
-ax.legend()
-st.pyplot(fig)
+st.header("4. Nilai Pelanggan Sepanjang Masa (Customer Lifetime Value - CLV)")
+total_penyewaan = data_terfilter['cnt'].sum()
+st.metric(label="Total Penyewaan (Data Terfilter)", value=total_penyewaan)
+st.write("**Kesimpulan:** Total penyewaan dalam periode yang dipilih memberikan gambaran nilai pelanggan secara keseluruhan.")
 
-# Bike Usage Patterns
-st.header("Bike Usage Patterns")
-
-
-st.subheader("Peak Hour Rentals")
-if 'hr' in df.columns:
-    fig, ax = plt.subplots()
-    sns.lineplot(data=df, x='hr', y='cnt', ax=ax)
-    ax.set_title('Bike Rentals by Hour of the Day')
-    ax.set_xlabel('Hour of the Day')
-    ax.set_ylabel('Bike Rentals')
-    st.pyplot(fig)
-else:
-    st.write("This visualization is not applicable for the Daily dataset.")
-
-# Season-wise Bike Rentals
-st.subheader("Bike Rentals by Season")
-fig, ax = plt.subplots()
-sns.boxplot(data=df, x='season', y='cnt', ax=ax)
-ax.set_title('Bike Rentals by Season')
-ax.set_xlabel('Season')
-ax.set_ylabel('Bike Rentals')
-st.pyplot(fig)
-
-# Working Day vs Holiday Rentals
-st.subheader("Bike Rentals on Working Day vs Holiday")
-fig, ax = plt.subplots()
-sns.boxplot(data=df, x='workingday', y='cnt', ax=ax)
-ax.set_title('Bike Rentals: Working Day vs Holiday')
-ax.set_xlabel('Working Day (1: Yes, 0: No)')
-ax.set_ylabel('Bike Rentals')
-st.pyplot(fig)
-
-
-
-# Display insights based on analysis
-st.header("Insights from Analysis")
-st.write("""
-1. **Key Factors Influencing Bike Rentals**:
-   - The **temperature** is a key factor influencing bike rentals. As temperatures rise, bike rentals tend to increase, which indicates a preference for outdoor activities when the weather is warm.
-   - **Bad weather** significantly affects bike rental counts, as people tend to avoid outdoor activities during unfavorable weather conditions.
-   - **Casual users** (informal renters) rent bikes more frequently than registered users, likely due to spontaneous use.
-   
-2. **Bike Usage Patterns**:
-   - The highest bike rental activity is observed during **morning** and **afternoon** hours. This is likely due to commuting needs during these peak times.
-   - The **Fall season** sees the highest bike rentals, likely due to its temperate weather and outdoor activity appeal.
-   - **Weekdays** (Monday to Saturday) have the highest bike rental counts, as bike usage decreases on Sundays.
-
-These insights can help in understanding the factors that influence bike rental patterns, allowing businesses to optimize bike availability and marketing strategies.
-""")
-
+# Fitur Interaktif Tambahan
+st.sidebar.header("Eksplorasi Data Per Jam")
+tampilkan_data_jam = st.sidebar.checkbox("Tampilkan Data Per Jam", value=False)
+if tampilkan_data_jam:
+    data_jam_terfilter = hour_df[
+        (hour_df['season'].isin(musim_terpilih)) &
+        (hour_df['weathersit'].isin(cuaca_terpilih))
+    ]
+    st.subheader("Distribusi Penyewaan Per Jam")
+    plt.figure(figsize=(10, 5))
+    sns.lineplot(x='hr', y='cnt', data=data_jam_terfilter, estimator='mean')
+    st.pyplot(plt.gcf())
