@@ -38,22 +38,27 @@ try:
     else:
         filtered_data = day_data[(day_data['season'] == selected_season) & (day_data['dteday'] >= pd.to_datetime(start_date)) & (day_data['dteday'] <= pd.to_datetime(end_date))]
 
-    # Tampilkan ringkasan data
-    st.header("Ringkasan Data Penyewaan Sepeda")
-    musim_label = "Semua Musim" if selected_season == 0 else seasons[selected_season]
-    st.write(f"Data disaring berdasarkan musim: **{musim_label}** dan rentang tanggal: **{start_date} hingga {end_date}**")
-    st.write(filtered_data[['dteday', 'season', 'cnt']])
+    # Visualisasi penyewaan berdasarkan musim dan cuaca
+    st.header("Penyewaan Sepeda Berdasarkan Musim dan Cuaca")
+    weather_season_data = day_data.groupby(['season', 'weathersit'])['cnt'].mean().reset_index()
+    fig_weather, ax_weather = plt.subplots(figsize=(10, 6))
+    sns.barplot(data=weather_season_data, x='season', y='cnt', hue='weathersit', palette='Set2', ax=ax_weather)
+    ax_weather.set_title("Rata-rata Penyewaan Sepeda Berdasarkan Musim dan Cuaca", fontsize=14)
+    ax_weather.set_xlabel("Musim", fontsize=12)
+    ax_weather.set_ylabel("Rata-rata Penyewaan", fontsize=12)
+    ax_weather.legend(title="Kondisi Cuaca")
+    st.pyplot(fig_weather)
 
     # Visualisasi penyewaan per jam dalam setiap musim
     st.header("Penyewaan Sepeda per Jam dalam Setiap Musim")
     hourly_season_data = hour_data.groupby(['season', 'hr'])['cnt'].mean().reset_index()
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.lineplot(data=hourly_season_data, x='hr', y='cnt', hue='season', palette='coolwarm', ax=ax)
-    ax.set_title("Penyewaan Sepeda per Jam Berdasarkan Musim", fontsize=14)
-    ax.set_xlabel("Jam", fontsize=12)
-    ax.set_ylabel("Rata-rata Penyewaan", fontsize=12)
-    ax.legend([seasons[s] for s in hourly_season_data['season'].unique()], title="Musim")
-    st.pyplot(fig)
+    fig_hourly, ax_hourly = plt.subplots(figsize=(10, 6))
+    sns.lineplot(data=hourly_season_data, x='hr', y='cnt', hue='season', palette='coolwarm', ax=ax_hourly)
+    ax_hourly.set_title("Penyewaan Sepeda per Jam Berdasarkan Musim", fontsize=14)
+    ax_hourly.set_xlabel("Jam", fontsize=12)
+    ax_hourly.set_ylabel("Rata-rata Penyewaan", fontsize=12)
+    ax_hourly.legend([seasons[s] for s in hourly_season_data['season'].unique()], title="Musim")
+    st.pyplot(fig_hourly)
 
     # Kesimpulan pertama
     st.write("Analisis ini menunjukkan pola penyewaan sepeda berdasarkan musim dan waktu dalam sehari. Ini membantu kita mengidentifikasi jam-jam sibuk yang berbeda di musim-musim tertentu, memberikan wawasan mengenai kapan pelanggan lebih cenderung menyewa sepeda. Penyewaan sepeda cenderung tinggi pada jam-jam sibuk (pagi dan sore) dan pada cuaca cerah. Musim juga memainkan peran, di mana musim Fall dan Summer menunjukkan tingkat penyewaan yang lebih tinggi.")
