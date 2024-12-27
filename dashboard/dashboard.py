@@ -21,18 +21,21 @@ st.title("Dashboard Penyewaan Sepeda")
 
 # Sidebar untuk filter
 st.sidebar.header("Filter Data")
-selected_date = st.sidebar.date_input("Pilih Tanggal", pd.Timestamp("2011-01-01"))
+start_date = st.sidebar.date_input("Tanggal Mulai", pd.Timestamp("2011-01-01"))
+end_date = st.sidebar.date_input("Tanggal Akhir", pd.Timestamp("2011-12-31"))
+hour_range = st.sidebar.slider("Rentang Jam", 0, 23, (0, 23))
 
 # Memuat data
 try:
     day_data, hour_data = load_data()
 
-    # Filter data berdasarkan tanggal
-    day_data_filtered = day_data[day_data['dteday'] == pd.Timestamp(selected_date)]
+    # Filter data berdasarkan rentang tanggal
+    day_data_filtered = day_data[(day_data['dteday'] >= pd.Timestamp(start_date)) & (day_data['dteday'] <= pd.Timestamp(end_date))]
+    hour_data_filtered = hour_data[(hour_data['hr'] >= hour_range[0]) & (hour_data['hr'] <= hour_range[1])]
 
     # Visualisasi penyewaan berdasarkan musim dan cuaca
     st.header("Penyewaan Sepeda Berdasarkan Musim dan Cuaca")
-    weather_season_data = day_data.groupby(['season', 'weathersit'])['cnt'].mean().reset_index()
+    weather_season_data = day_data_filtered.groupby(['season', 'weathersit'])['cnt'].mean().reset_index()
     weather_labels = {1: "Clear", 2: "Few clouds", 3: "Partly cloudy"}
     fig_weather, ax_weather = plt.subplots(figsize=(10, 6))
     sns.barplot(data=weather_season_data, x='season', y='cnt', hue='weathersit', palette='Set2', ax=ax_weather)
@@ -45,7 +48,7 @@ try:
 
     # Visualisasi penyewaan per jam dalam setiap musim
     st.header("Penyewaan Sepeda per Jam dalam Setiap Musim")
-    hourly_season_data = hour_data.groupby(['season', 'hr'])['cnt'].mean().reset_index()
+    hourly_season_data = hour_data_filtered.groupby(['season', 'hr'])['cnt'].mean().reset_index()
     hourly_season_data['hr'] = hourly_season_data['hr'] + 1  # Shift jam dari 0-23 menjadi 1-24
     fig_hourly, ax_hourly = plt.subplots(figsize=(10, 6))
     sns.lineplot(data=hourly_season_data, x='hr', y='cnt', hue='season', palette='coolwarm', ax=ax_hourly)
@@ -60,7 +63,7 @@ try:
 
     # Analisis waktu terbaik untuk meningkatkan ketersediaan sepeda
     st.header("Analisis Waktu Terbaik")
-    avg_rentals_by_hour = hour_data.groupby('hr')['cnt'].mean().reset_index()
+    avg_rentals_by_hour = hour_data_filtered.groupby('hr')['cnt'].mean().reset_index()
     avg_rentals_by_hour['hr'] = avg_rentals_by_hour['hr'] + 1  # Shift jam dari 0-23 menjadi 1-24
     fig2, ax2 = plt.subplots(figsize=(10, 6))
     sns.barplot(data=avg_rentals_by_hour, x='hr', y='cnt', palette='viridis', ax=ax2)
