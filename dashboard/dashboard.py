@@ -42,10 +42,6 @@ try:
     st.write(f"Data disaring berdasarkan musim: **{musim_label}** dan rentang tanggal: **{start_date} hingga {end_date}**")
     st.write(filtered_data[['dteday', 'season', 'cnt']])
 
-    # Visualisasi pola penyewaan sepeda
-    st.header("Visualisasi Penyewaan Sepeda")
-    st.line_chart(filtered_data.set_index('dteday')['cnt'])
-
     # Visualisasi penyewaan berdasarkan musim dan cuaca
     st.header("Penyewaan Berdasarkan Musim dan Cuaca")
     rentals_by_season = day_data.groupby('season')['cnt'].mean()
@@ -59,7 +55,7 @@ try:
     st.bar_chart(rentals_by_weather.rename(index=weathers))
 
     # Kesimpulan pertama
-    st.write("Berdasarkan analisis EDA, faktor utama yang memengaruhi pola penyewaan sepeda adalah waktu dalam sehari (jam) dan kondisi cuaca. Penyewaan sepeda cenderung tinggi pada jam-jam sibuk (pagi dan sore) dan pada cuaca cerah. Musim juga memainkan peran, di mana musim Fall dan Summer menunjukkan tingkat penyewaan yang lebih tinggi.")
+    st.write("Analisis ini menunjukkan pola penyewaan sepeda berdasarkan musim dan waktu dalam sehari. Ini membantu kita mengidentifikasi jam-jam sibuk yang berbeda di musim-musim tertentu, memberikan wawasan mengenai kapan pelanggan lebih cenderung menyewa sepeda. Penyewaan sepeda cenderung tinggi pada jam-jam sibuk (pagi dan sore) dan pada cuaca cerah. Musim juga memainkan peran, di mana musim Fall dan Summer menunjukkan tingkat penyewaan yang lebih tinggi.")
 
     # Analisis waktu terbaik untuk meningkatkan ketersediaan sepeda
     st.header("Analisis Waktu Terbaik")
@@ -68,7 +64,7 @@ try:
     st.bar_chart(avg_rentals_by_hour)
 
     # Kesimpulan kedua
-    st.write("Waktu terbaik untuk meningkatkan ketersediaan sepeda adalah pada jam-jam sibuk (pagi dan sore), terutama pada musim Summer dan Fall, yang menunjukkan permintaan yang lebih tinggi. Penyewaan sepeda lebih tinggi di musim-musim tersebut, dan saat cuaca cerah, sehingga meningkatkan ketersediaan sepeda pada jam-jam ini dapat membantu mengoptimalkan operasional.")
+    st.write("Berdasarkan analisis EDA, faktor utama yang memengaruhi pola penyewaan sepeda adalah waktu dalam sehari (jam) dan kondisi cuaca. Penyewaan sepeda cenderung tinggi pada jam-jam sibuk (pagi dan sore) dan pada cuaca cerah. Musim juga memainkan peran, di mana musim Fall dan Summer menunjukkan tingkat penyewaan yang lebih tinggi.")
 
 except Exception as e:
     st.error(f"Terjadi kesalahan saat memuat data: {e}")
