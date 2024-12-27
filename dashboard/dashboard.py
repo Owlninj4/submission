@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Fungsi untuk memuat dataset
 def load_data():
@@ -53,6 +55,17 @@ try:
     weathers = {1: "Cerah", 2: "Berawan", 3: "Hujan Ringan", 4: "Hujan Lebat"}
     st.subheader("Rata-rata Penyewaan Berdasarkan Cuaca")
     st.bar_chart(rentals_by_weather.rename(index=weathers))
+
+    # Visualisasi penyewaan per jam dalam setiap musim
+    st.header("Penyewaan Sepeda per Jam dalam Setiap Musim")
+    hourly_season_data = hour_data.groupby(['season', 'hr'])['cnt'].mean().reset_index()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.lineplot(data=hourly_season_data, x='hr', y='cnt', hue='season', palette='tab10', ax=ax)
+    ax.set_title("Penyewaan Sepeda per Jam Berdasarkan Musim", fontsize=14)
+    ax.set_xlabel("Jam", fontsize=12)
+    ax.set_ylabel("Rata-rata Penyewaan", fontsize=12)
+    ax.legend([seasons[s] for s in hourly_season_data['season'].unique()], title="Musim")
+    st.pyplot(fig)
 
     # Kesimpulan pertama
     st.write("Analisis ini menunjukkan pola penyewaan sepeda berdasarkan musim dan waktu dalam sehari. Ini membantu kita mengidentifikasi jam-jam sibuk yang berbeda di musim-musim tertentu, memberikan wawasan mengenai kapan pelanggan lebih cenderung menyewa sepeda. Penyewaan sepeda cenderung tinggi pada jam-jam sibuk (pagi dan sore) dan pada cuaca cerah. Musim juga memainkan peran, di mana musim Fall dan Summer menunjukkan tingkat penyewaan yang lebih tinggi.")
