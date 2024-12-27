@@ -19,9 +19,16 @@ def load_data():
 # Judul aplikasi
 st.title("Dashboard Penyewaan Sepeda")
 
+# Sidebar untuk filter
+st.sidebar.header("Filter Data")
+selected_date = st.sidebar.date_input("Pilih Tanggal", pd.Timestamp("2011-01-01"))
+
 # Memuat data
 try:
     day_data, hour_data = load_data()
+
+    # Filter data berdasarkan tanggal
+    day_data_filtered = day_data[day_data['dteday'] == pd.Timestamp(selected_date)]
 
     # Visualisasi penyewaan berdasarkan musim dan cuaca
     st.header("Penyewaan Sepeda Berdasarkan Musim dan Cuaca")
